@@ -498,7 +498,7 @@ MonoBehaviour:
     Color: {r: 0.4764151, g: 1, b: 0.9632572, a: 1}
   - Value: 512
     Color: {r: 0.3066038, g: 1, b: 0.9513406, a: 1}
-  - Value: 1025
+  - Value: 1024
     Color: {r: 0, g: 1, b: 0.9298246, a: 1}
   - Value: 2048
     Color: {r: 1, g: 0.8269179, b: 0.7764706, a: 1}
