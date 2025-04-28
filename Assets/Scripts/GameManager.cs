@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Manages the overall game flow, including grid generation, input handling, shifting blocks, and game states.
@@ -20,16 +21,22 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int winCondition = 2048; // Target block value to win.
     [SerializeField] private GameObject winScreen; // UI shown on win.
     [SerializeField] private GameObject loseScreen; // UI shown on lose.
+    [SerializeField] private float swipeThreshold = 50f; // Minimum distance for a swipe to count
 
     private List<Node> nodes; // List of all grid nodes.
     private List<Block> blocks; // List of all active blocks.
     private GameState state; // Current game state.
     private int round; // Current round number.
 
+    private Vector2 touchStart;
+    private Vector2 touchEnd;
+
+
     private BlockType GetBlockTypeByValue(int value) => types.First(t => t.Value == value);
 
     void Start()
     {
+        Application.targetFrameRate = 60;
         ChangeState(GameState.GenerateLevel);
     }
 
@@ -62,13 +69,31 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if(state != GameState.WaitingInput) return;
+        if (state != GameState.WaitingInput) return;
 
-        if(Input.GetKeyDown(KeyCode.LeftArrow)) Shift(Vector2.left);
-        if(Input.GetKeyDown(KeyCode.RightArrow)) Shift(Vector2.right);
-        if(Input.GetKeyDown(KeyCode.UpArrow)) Shift(Vector2.up);
-        if(Input.GetKeyDown(KeyCode.DownArrow)) Shift(Vector2.down);
+        // Keyboard input
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) Shift(Vector2.left);
+        if (Input.GetKeyDown(KeyCode.RightArrow)) Shift(Vector2.right);
+        if (Input.GetKeyDown(KeyCode.UpArrow)) Shift(Vector2.up);
+        if (Input.GetKeyDown(KeyCode.DownArrow)) Shift(Vector2.down);
+
+        // Mobile touch input
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            if (touch.phase == TouchPhase.Began)
+            {
+                touchStart = touch.position;
+            }
+            else if (touch.phase == TouchPhase.Ended)
+            {
+                touchEnd = touch.position;
+                HandleSwipe();
+            }
+        }
     }
+
 
     /// <summary>
     /// Generates the initial grid and board layout.
@@ -262,6 +287,52 @@ public class GameManager : MonoBehaviour
         // No moves or merges possible
         return false;
     }
+
+    /// <summary>
+    /// Detects swipe direction from touch input and shifts blocks accordingly.
+    /// </summary>
+    void HandleSwipe()
+    {
+        Vector2 swipe = touchEnd - touchStart;
+
+        Debug.Log("Swipe Detected: " + swipe);
+
+
+        if (swipe.magnitude < swipeThreshold) return; // Ignore short swipes
+
+        swipe.Normalize(); // Make it direction-only
+
+        if (Mathf.Abs(swipe.x) > Mathf.Abs(swipe.y))
+        {
+            // Horizontal swipe
+            if (swipe.x > 0)
+            {
+                Shift(Vector2.right);
+            }
+            else
+            {
+                Shift(Vector2.left);
+            }
+        }
+        else
+        {
+            // Vertical swipe
+            if (swipe.y > 0)
+            {
+                Shift(Vector2.up);
+            }
+            else
+            {
+                Shift(Vector2.down);
+            }
+        }
+    }
+
+    public void Reset()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
 
 }
 
