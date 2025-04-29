@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 /// <summary>
 /// Manages the overall game flow, including grid generation, input handling, shifting blocks, and game states.
@@ -22,6 +23,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject winScreen; // UI shown on win.
     [SerializeField] private GameObject loseScreen; // UI shown on lose.
     [SerializeField] private float swipeThreshold = 50f; // Minimum distance for a swipe to count
+    [SerializeField] private TextMeshProUGUI scoreText;
 
     private List<Node> nodes; // List of all grid nodes.
     private List<Block> blocks; // List of all active blocks.
@@ -30,6 +32,8 @@ public class GameManager : MonoBehaviour
 
     private Vector2 touchStart;
     private Vector2 touchEnd;
+
+    private int score;
 
 
     private BlockType GetBlockTypeByValue(int value) => types.First(t => t.Value == value);
@@ -100,6 +104,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void GenerateGrid()
     {
+        score = 0;
         round = 0;
         nodes = new List<Node>();
         blocks = new List<Block>();
@@ -209,10 +214,19 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Merges two blocks into a new block with doubled value.
     /// </summary>
-    void MergeBlock(Block baseBlock, Block mergingBlock){
+    void MergeBlock(Block baseBlock, Block mergingBlock)
+    {
+        AddScore(baseBlock.Value * 2);
+
         SpawnBlock(baseBlock.Node, baseBlock.Value * 2);
+
         RemoveBlock(baseBlock);
         RemoveBlock(mergingBlock);
+    }
+    void AddScore(int addValue)
+    {
+        score += addValue;
+        scoreText.text = score + "";
     }
 
     /// <summary>
