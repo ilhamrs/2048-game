@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,7 @@ using UnityEngine;
 public class SaveGameManager : MonoBehaviour
 {
     public static SaveGameManager Instance;
-    string path = "/Data"+".sav";
+    // string path = "/Data"+".sav";
     public int score;
     void Awake()
     {
@@ -23,32 +24,47 @@ public class SaveGameManager : MonoBehaviour
 
         byte[] buffer = builder.SizedByteArray();
 
-        File.WriteAllBytes(Application.dataPath + path, buffer);
-        Debug.Log("wrote "+builder.Offset + " byte to "+path);
+        string fullPath = Path.Combine(Application.persistentDataPath, "Data.sav");
+        File.WriteAllBytes(fullPath, buffer);
+        Debug.Log("Wrote " + buffer.Length + " bytes to " + fullPath);
     }
+
     void Start()
     {
         Load();
     }
-    void Load(){
+    void Load()
+    {
+        try
+        {
+            string fullPath = Path.Combine(Application.persistentDataPath, "Data.sav");
 
-        try{
-            ByteBuffer loader = new(File.ReadAllBytes(Application.dataPath + path));
-            SaveGame.Data loadData = SaveGame.Data.GetRootAsData(loader);
+            if (File.Exists(fullPath))
+            {
+                ByteBuffer loader = new(File.ReadAllBytes(fullPath));
+                SaveGame.Data loadData = SaveGame.Data.GetRootAsData(loader);
 
-            int value = loadData.Highscore;
+                int value = loadData.Highscore;
+                score = value;
 
-            score = value;
-
-            // Debug.LogError(value);
-
-            GameManager.Instance.SetHighScore(value);
-        }catch{
+                GameManager.Instance.SetHighScore(value);
+                Debug.Log("Loaded highscore: " + value);
+            }
+            else
+            {
+                Debug.LogWarning("Save file not found. Starting with score 0.");
+                score = 0;
+                GameManager.Instance.SetHighScore(0);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to load data: " + e.Message);
             score = 0;
             GameManager.Instance.SetHighScore(0);
         }
-        
     }
+
     private void OnApplicationQuit() {
         // Save();
     }
