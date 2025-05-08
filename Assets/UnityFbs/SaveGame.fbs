@@ -1,0 +1,9 @@
+namespace SaveGame;
+
+table Data {
+   highscore: int = 0;
+}
+
+root_type Data;
+
+file_identifier "Data";

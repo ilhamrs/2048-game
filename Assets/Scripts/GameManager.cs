@@ -12,6 +12,7 @@ using TMPro;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
     [SerializeField] private int width = 4; // Grid width.
     [SerializeField] private int height = 4; // Grid height.
     [SerializeField] private Node nodePrefab; // Prefab for grid nodes.
@@ -23,7 +24,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject winScreen; // UI shown on win.
     [SerializeField] private GameObject loseScreen; // UI shown on lose.
     [SerializeField] private float swipeThreshold = 50f; // Minimum distance for a swipe to count
+    [SerializeField] private TextMeshProUGUI highscoreText;
     [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI comboText;
 
     private List<Node> nodes; // List of all grid nodes.
     private List<Block> blocks; // List of all active blocks.
@@ -34,14 +37,23 @@ public class GameManager : MonoBehaviour
     private Vector2 touchEnd;
 
     private int score;
-
+    private int highscore = 0;
 
     private BlockType GetBlockTypeByValue(int value) => types.First(t => t.Value == value);
-
+    void Awake()
+    {
+        Instance = this;
+    }
     void Start()
     {
         Application.targetFrameRate = 60;
         ChangeState(GameState.GenerateLevel);
+        highscoreText.text = highscore + "";
+    }
+    public void SetHighScore(int value)
+    {
+        highscore = value;
+        highscoreText.text = highscore + "";
     }
 
     /// <summary>
@@ -344,6 +356,7 @@ public class GameManager : MonoBehaviour
 
     public void Reset()
     {
+        if(score > highscore) SaveGameManager.Instance.Save(score);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
