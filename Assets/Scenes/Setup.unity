@@ -132,7 +132,6 @@ GameObject:
   m_Component:
   - component: {fileID: 859913193}
   - component: {fileID: 859913192}
-  - component: {fileID: 859913194}
   m_Layer: 0
   m_Name: Setup Manager
   m_TagString: Untagged
@@ -167,18 +166,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &859913194
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 859913191}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ac6dcd99f7fb284391d8de834ab8ddb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1014207089
 GameObject:
   m_ObjectHideFlags: 0
@@ -197,7 +184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1014207090
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -59,7 +59,8 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Changes the current game state and triggers corresponding actions.
     /// </summary>
-    private void ChangeState(GameState newState){
+    private void ChangeState(GameState newState)
+    {
         state = newState;
 
         switch (newState)
@@ -121,14 +122,16 @@ public class GameManager : MonoBehaviour
         nodes = new List<Node>();
         blocks = new List<Block>();
 
-        for(int x = 0; x < width; x++){
-            for(int y = 0; y < width; y++){
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < width; y++)
+            {
                 var node = Instantiate(nodePrefab, new Vector2(x, y), Quaternion.identity);
                 nodes.Add(node);
             }
         }
 
-        var center = new Vector2((float) width / 2 - .5f, (float) height / 2 - .5f);
+        var center = new Vector2((float)width / 2 - .5f, (float)height / 2 - .5f);
 
         var board = Instantiate(boardPrefab, center, Quaternion.identity);
         board.size = new Vector2(width, height);
@@ -141,8 +144,9 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Spawns a set amount of new blocks in random empty nodes.
     /// </summary>
-    void SpawnBlocks(int amount){
-        var freeNodes = nodes.Where(n=>n.OccupiedBlock == null).OrderBy(b => UnityEngine.Random.value).ToList();
+    void SpawnBlocks(int amount)
+    {
+        var freeNodes = nodes.Where(n => n.OccupiedBlock == null).OrderBy(b => UnityEngine.Random.value).ToList();
 
         foreach (var node in freeNodes.Take(amount))
         {
@@ -152,7 +156,7 @@ public class GameManager : MonoBehaviour
             blocks.Add(block);
         }
 
-        if(freeNodes.Count() == 1 && !CanMoveOrMerge())
+        if (freeNodes.Count() == 1 && !CanMoveOrMerge())
         {
             ChangeState(GameState.Lose);
             return;
@@ -164,7 +168,8 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Spawns a single block of a specific value on a given node.
     /// </summary>
-    void SpawnBlock(Node node, int value){
+    void SpawnBlock(Node node, int value)
+    {
         var block = Instantiate(blockPrefab, node.Pos, Quaternion.identity);
         block.Init(GetBlockTypeByValue(value));
         block.SetBlock(node);
@@ -176,13 +181,13 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Shift(Vector2 dir)
     {
-        if(!CanMoveOrMerge(dir)) return;
+        if (!CanMoveOrMerge(dir)) return;
 
         ChangeState(GameState.Moving);
 
         var orderedBlocks = blocks.OrderBy(b => b.Pos.x).ThenBy(b => b.Pos.y).ToList();
 
-        if(dir == Vector2.right || dir == Vector2.up) orderedBlocks.Reverse();
+        if (dir == Vector2.right || dir == Vector2.up) orderedBlocks.Reverse();
 
         foreach (var block in orderedBlocks)
         {
@@ -193,14 +198,15 @@ public class GameManager : MonoBehaviour
 
                 var possibleNode = GetNodeAtPosition(next.Pos + dir);
 
-                if(possibleNode != null)
+                if (possibleNode != null)
                 {
-                    if(possibleNode.OccupiedBlock != null && possibleNode.OccupiedBlock.CanMerge(block.Value)){
+                    if (possibleNode.OccupiedBlock != null && possibleNode.OccupiedBlock.CanMerge(block.Value))
+                    {
                         block.MergeBlock(possibleNode.OccupiedBlock);
                     }
-                    else if(possibleNode.OccupiedBlock == null) next = possibleNode;
+                    else if (possibleNode.OccupiedBlock == null) next = possibleNode;
                 }
-                
+
             } while (next != block.Node);
 
             block.transform.DOMove(block.Node.Pos, travelTime);
@@ -214,7 +220,8 @@ public class GameManager : MonoBehaviour
             sequence.Insert(0, block.transform.DOMove(movePoint, travelTime));
         }
 
-        sequence.OnComplete(() => {
+        sequence.OnComplete(() =>
+        {
             foreach (var block in orderedBlocks.Where(b => b.MergingBlock != null))
             {
                 MergeBlock(block.MergingBlock, block);
@@ -244,7 +251,8 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Removes a block from the game.
     /// </summary>
-    void RemoveBlock(Block block){
+    void RemoveBlock(Block block)
+    {
         blocks.Remove(block);
         Destroy(block.gameObject);
     }
@@ -252,7 +260,8 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Returns the node at a given position, or null if none exists.
     /// </summary>
-    Node GetNodeAtPosition(Vector2 pos){
+    Node GetNodeAtPosition(Vector2 pos)
+    {
         return nodes.FirstOrDefault(n => n.Pos == pos);
     }
 
@@ -356,8 +365,13 @@ public class GameManager : MonoBehaviour
 
     public void Reset()
     {
-        if(score > highscore) SaveGameManager.Instance.Save(score);
+        if (score > highscore) SaveGameManager.Instance.Save(score);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void BackToMainMenu()
+    {
+        SceneManager.LoadScene("Home");
     }
 
 
