@@ -9,6 +9,7 @@ public class SaveGameManager : MonoBehaviour
 {
     public static SaveGameManager Instance;
     // string path = "/Data"+".sav";
+    public string filename;
     public int score;
     void Awake()
     {
@@ -24,7 +25,7 @@ public class SaveGameManager : MonoBehaviour
 
         byte[] buffer = builder.SizedByteArray();
 
-        string fullPath = Path.Combine(Application.persistentDataPath, "Data.sav");
+        string fullPath = Path.Combine(Application.persistentDataPath, filename);
         File.WriteAllBytes(fullPath, buffer);
         Debug.Log("Wrote " + buffer.Length + " bytes to " + fullPath);
     }
@@ -37,7 +38,7 @@ public class SaveGameManager : MonoBehaviour
     {
         try
         {
-            string fullPath = Path.Combine(Application.persistentDataPath, "Data.sav");
+            string fullPath = Path.Combine(Application.persistentDataPath, filename);
 
             if (File.Exists(fullPath))
             {

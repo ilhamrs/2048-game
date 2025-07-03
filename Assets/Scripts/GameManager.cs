@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int winCondition = 2048; // Target block value to win.
     [SerializeField] private GameObject winScreen; // UI shown on win.
     [SerializeField] private GameObject loseScreen; // UI shown on lose.
+    [SerializeField] private GameObject pauseScreen;
     [SerializeField] private float swipeThreshold = 50f; // Minimum distance for a swipe to count
     [SerializeField] private TextMeshProUGUI highscoreText;
     [SerializeField] private TextMeshProUGUI scoreText;
@@ -32,6 +33,7 @@ public class GameManager : MonoBehaviour
     private List<Block> blocks; // List of all active blocks.
     private GameState state; // Current game state.
     private int round; // Current round number.
+    private bool isPause = false;
 
     private Vector2 touchStart;
     private Vector2 touchEnd;
@@ -76,9 +78,11 @@ public class GameManager : MonoBehaviour
             case GameState.Moving:
                 break;
             case GameState.Win:
+                SaveHighScore();
                 winScreen.SetActive(true);
                 break;
             case GameState.Lose:
+                SaveHighScore();
                 loseScreen.SetActive(true);
                 break;
         }
@@ -86,7 +90,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (state != GameState.WaitingInput) return;
+        if (state != GameState.WaitingInput || isPause) return;
 
         // Keyboard input
         if (Input.GetKeyDown(KeyCode.LeftArrow)) Shift(Vector2.left);
@@ -365,13 +369,22 @@ public class GameManager : MonoBehaviour
 
     public void Reset()
     {
-        if (score > highscore) SaveGameManager.Instance.Save(score);
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void BackToMainMenu()
     {
         SceneManager.LoadScene("Home");
+    }
+    void SaveHighScore()
+    {
+        if (score > highscore) SaveGameManager.Instance.Save(score);
+    }
+    public void togglePause()
+    {
+        isPause = !isPause;
+        pauseScreen.SetActive(isPause);
     }
 
 
