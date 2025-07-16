@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (state != GameState.WaitingInput || isPause) return;
 
@@ -383,8 +383,13 @@ public class GameManager : MonoBehaviour
     }
     public void togglePause()
     {
-        isPause = !isPause;
         pauseScreen.SetActive(isPause);
+        isPause = !isPause;
+    }
+    public void SetPause(bool v)
+    {
+        pauseScreen.SetActive(v);
+        isPause = v;
     }
 
 
