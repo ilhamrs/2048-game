@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    void Update()
     {
         if (state != GameState.WaitingInput || isPause) return;
 
@@ -365,6 +365,9 @@ public class GameManager : MonoBehaviour
                 Shift(Vector2.down);
             }
         }
+
+        touchStart = Vector2.zero;
+        touchEnd = Vector2.zero;
     }
 
     public void Reset()
@@ -388,6 +391,14 @@ public class GameManager : MonoBehaviour
     }
     public void SetPause(bool v)
     {
+        StartCoroutine(SetPauseDelay(v));
+        // pauseScreen.SetActive(v);
+        // isPause = v;
+    }
+    IEnumerator SetPauseDelay(bool v)
+    {
+        yield return new WaitForSeconds(.3f);
+
         pauseScreen.SetActive(v);
         isPause = v;
     }
