@@ -4,6 +4,7 @@ using UnityEngine.Advertisements;
 
 public class BannerAd : MonoBehaviour
 {
+  public static BannerAd Instance;
   // For the purpose of this example, these buttons are for functionality testing:
   //   [SerializeField] Button _loadBannerButton;
   //   [SerializeField] Button _showBannerButton;
@@ -14,7 +15,16 @@ public class BannerAd : MonoBehaviour
   [SerializeField] string _androidAdUnitId = "Banner_Android";
   [SerializeField] string _iOSAdUnitId = "Banner_iOS";
   string _adUnitId = null; // This will remain null for unsupported platforms.
-
+  void Awake()
+  {
+    if (Instance != null && Instance != this)
+    {
+      Destroy(gameObject);
+      return;
+    }
+    Instance = this;
+    DontDestroyOnLoad(gameObject);
+  }
   void Start()
   {
     // Get the Ad Unit ID for the current platform:

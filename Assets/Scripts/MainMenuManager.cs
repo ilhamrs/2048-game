@@ -14,4 +14,8 @@ public class MainMenuManager : MonoBehaviour
     {
         Application.Quit();
     }
+    public void ShowInterstitialAd()
+    {
+        InterstitialAd.Instance?.ShowAd();
+    }
 }

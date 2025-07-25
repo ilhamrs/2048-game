@@ -205,9 +205,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1446481328}
-        m_TargetAssemblyTypeName: InterstitialAd, Assembly-CSharp
-        m_MethodName: ShowAd
+      - m_Target: {fileID: 1822745623}
+        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
+        m_MethodName: ShowInterstitialAd
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

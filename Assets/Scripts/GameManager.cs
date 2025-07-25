@@ -378,6 +378,7 @@ public class GameManager : MonoBehaviour
 
     public void BackToMainMenu()
     {
+        InterstitialAd.Instance?.ShowAd();
         SceneManager.LoadScene("Home");
     }
     void SaveHighScore()
