@@ -10,6 +10,11 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("ClassicGameplay");
     }
 
+    public void Start5x5()
+    {
+        SceneManager.LoadScene("5x5Gameplay");
+    }
+
     public void CloseGame()
     {
         Application.Quit();

@@ -456,7 +456,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f60c2d672499e094ab8bf4c309eb11d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  filename: data4x4.sav
+  filename: data5x5.sav
   score: 0
 --- !u!4 &308364637
 Transform:
@@ -1779,8 +1779,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d570fa7182f964845ad2d86d23c751b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 4
-  height: 4
+  width: 5
+  height: 5
   nodePrefab: {fileID: 4260651241755231062, guid: ee641d1a82462424e93cef8986c17b66, type: 3}
   blockPrefab: {fileID: 7562815798587935434, guid: 85bdfd71d1e1ee24eb9baa4e475bb040, type: 3}
   boardPrefab: {fileID: 640232095565102288, guid: 79e3c314ec91aa846b6a912ed98fa190, type: 3}
