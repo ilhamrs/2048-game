@@ -8,7 +8,11 @@ using System;
 
 public class UnityAuthentication : MonoBehaviour
 {
-
+    public static UnityAuthentication Instance;
+    void Awake()
+    {
+        Instance = this;
+    }
     // Start is called before the first frame update
     async void Start()
     {
