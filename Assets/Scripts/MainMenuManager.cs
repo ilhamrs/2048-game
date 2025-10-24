@@ -23,4 +23,8 @@ public class MainMenuManager : MonoBehaviour
     {
         InterstitialAd.Instance?.ShowAd();
     }
+    public void ShowLogin()
+    {
+        SceneManager.LoadScene("UnityPlayerAccountsUIExample");
+    }
 }
