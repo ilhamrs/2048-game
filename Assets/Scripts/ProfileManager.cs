@@ -9,27 +9,44 @@ using System.Threading.Tasks;
 using Unity.Services.Authentication.PlayerAccounts;
 using System;
 using Unity.Services.Core;
+using Facebook.Unity;
 
 public class ProfileManager : MonoBehaviour
 {
     public string playerID;
-    public bool isLinkToUnityID = false;
-    public Button linkUnityButton;
-    public TextMeshProUGUI playerIDText, isLinkToUnityText;
+    public bool isLinkToUnityID = false, isLinkToFacebook = false;
+    public Button linkUnityButton, linkFbButton;
+    public TextMeshProUGUI playerIDText, isLinkToUnityText, playerFbEmail;
     // Start is called before the first frame update
     void Start()
     {
         RefreshProfile();
     }
 
-    public void RefreshProfile()
+    public async Task RefreshProfile()
     {
+        await checkAccountAsync();
+
         playerID = AuthenticationService.Instance.PlayerId;
         playerIDText.text = playerID;
 
         isLinkToUnityID = AuthenticationService.Instance.IsSignedIn;
         linkUnityButton.gameObject.SetActive(!isLinkToUnityID);
         isLinkToUnityText.text = isLinkToUnityID ? "linked" : "";
+
+        // isLinkToFacebook = HasFacebook();
+        linkFbButton.gameObject.SetActive(!isLinkToFacebook);
+        if (isLinkToFacebook)
+        {
+            var profile = FB.Mobile.CurrentProfile();
+            playerFbEmail.text = profile.Email;
+
+            FB.API("/me?fields=name,email", HttpMethod.GET, OnProfileDataReceived);
+        }
+        else
+        {
+            playerFbEmail.text = "";
+        }
     }
     public void BackToMainMenu()
     {
@@ -116,5 +133,88 @@ public class ProfileManager : MonoBehaviour
             Debug.LogException(ex);
         }
     }
+    bool HasFacebook()
+    {
+        return FB.IsLoggedIn;
+    }
+    async Task checkAccountAsync()
+    {
+        try
+        {
+            // Get the PlayerInfo object for the currently signed-in player.
+            PlayerInfo playerInfo = await AuthenticationService.Instance.GetPlayerInfoAsync();
 
+            // The list of linked accounts is stored in the Identities property.
+            List<Identity> linkedIdentities = playerInfo.Identities;
+
+            Debug.Log($"Player ID: {playerInfo.Id}");
+            Debug.Log($"Linked Accounts Found: {linkedIdentities.Count}");
+
+            foreach (var identity in linkedIdentities)
+            {
+                Debug.Log($"Provider: {identity.TypeId}, External ID: {identity.UserId}");
+                if (identity.TypeId == "facebook" || identity.TypeId == "facebook.com")
+                {
+                    isLinkToFacebook = true;
+                }
+            }
+        }
+        catch (AuthenticationException ex)
+        {
+            // Handle authentication-specific errors, like the player not being signed in.
+            Debug.LogError($"Authentication error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Handle other potential exceptions.
+            Debug.LogError($"General error: {ex.Message}");
+        }
+    }
+    string userName, userEmail, userId;
+    Texture2D profilePicture;
+    private void OnProfileDataReceived(IGraphResult result)
+    {
+        if (string.IsNullOrEmpty(result.Error))
+        {
+            var data = result.ResultDictionary;
+
+            if (data.ContainsKey("name"))
+                userName = data["name"].ToString();
+
+            if (data.ContainsKey("email"))
+                userEmail = data["email"].ToString();
+
+            Debug.Log($"Nama: {userName}");
+            Debug.Log($"Email: {userEmail}");
+            Debug.Log($"UserID: {userId}");
+
+            playerFbEmail.text = userEmail;
+
+            // Ambil foto profil
+            // StartCoroutine(GetProfilePicture());
+        }
+        else
+        {
+            Debug.LogError("Gagal mengambil data profil Facebook: " + result.Error);
+        }
+    }
+    private IEnumerator GetProfilePicture()
+    {
+        string url = $"https://graph.facebook.com/{userId}/picture?type=large";
+        WWW www = new WWW(url);
+        yield return www;
+
+        if (string.IsNullOrEmpty(www.error))
+        {
+            profilePicture = www.texture;
+            Debug.Log("🖼️ Foto profil berhasil diambil!");
+
+            // Contoh: tampilkan di UI (kalau ada Image component)
+            // GetComponent<UnityEngine.UI.RawImage>().texture = profilePicture;
+        }
+        else
+        {
+            Debug.LogError("Gagal mengambil foto profil: " + www.error);
+        }
+    }
 }

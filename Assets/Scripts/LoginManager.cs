@@ -36,7 +36,6 @@ public class LoginManager : MonoBehaviour
         Debug.Log("returning player signing in...");
         await SignInAnonymouslyAsync();
 
-        // SceneManager.LoadScene(1);
     }
 
     // Update is called once per frame
@@ -57,6 +56,8 @@ public class LoginManager : MonoBehaviour
 
             // Shows how to get the playerID
             Debug.Log($"PlayerID: {AuthenticationService.Instance.PlayerId}");
+
+            SceneManager.LoadScene(1);
 
         }
         catch (AuthenticationException ex)
@@ -219,6 +220,9 @@ public class LoginManager : MonoBehaviour
                 {
                     await LinkWithFacebookAsync(facebookAccessToken);
                 }
+
+                // Ambil data profil dari Graph API
+                FB.API("/me?fields=name,email", HttpMethod.GET, OnProfileDataReceived);
             }
             else
             {
@@ -269,6 +273,35 @@ public class LoginManager : MonoBehaviour
             // Compare error code to CommonErrorCodes
             // Notify the player with the proper error message
             Debug.LogException(ex);
+        }
+    }
+    bool HasFacebook()
+    {
+        return AuthenticationService.Instance.PlayerInfo.GetFacebookId() != null;
+    }
+    string userName, userEmail, userId;
+    private void OnProfileDataReceived(IGraphResult result)
+    {
+        if (string.IsNullOrEmpty(result.Error))
+        {
+            var data = result.ResultDictionary;
+
+            if (data.ContainsKey("name"))
+                userName = data["name"].ToString();
+
+            if (data.ContainsKey("email"))
+                userEmail = data["email"].ToString();
+
+            Debug.Log($"👤 Nama: {userName}");
+            Debug.Log($"📧 Email: {userEmail}");
+            Debug.Log($"🆔 UserID: {userId}");
+
+            // Ambil foto profil
+            // StartCoroutine(GetProfilePicture());
+        }
+        else
+        {
+            Debug.LogError("Gagal mengambil data profil Facebook: " + result.Error);
         }
     }
     public void SignOut()
