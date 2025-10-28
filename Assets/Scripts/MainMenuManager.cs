@@ -27,4 +27,8 @@ public class MainMenuManager : MonoBehaviour
     {
         SceneManager.LoadScene("UnityPlayerAccountsUIExample");
     }
+    public void ShowProfile()
+    {
+        SceneManager.LoadScene("Profile");
+    }
 }

@@ -1,73 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Services.Core;
-using System.Threading.Tasks;
 using Unity.Services.Authentication;
-using System;
+using UnityEngine.UI;
+using TMPro;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
 using Unity.Services.Authentication.PlayerAccounts;
+using System;
+using Unity.Services.Core;
 
-
-public class LoginManager : MonoBehaviour
+public class ProfileManager : MonoBehaviour
 {
-    private async void Awake()
-    {
-        if (UnityServices.State == ServicesInitializationState.Uninitialized)
-        {
-            Debug.Log("Services Initializing");
-            await UnityServices.InitializeAsync();
-        }
-
-        PlayerAccountService.Instance.SignedIn += SignInOrLinkWithUnity;
-    }
+    public string playerID;
+    public bool isLinkToUnityID = false;
+    public Button linkUnityButton;
+    public TextMeshProUGUI playerIDText, isLinkToUnityText;
     // Start is called before the first frame update
-    async void Start()
+    void Start()
     {
-        if (!AuthenticationService.Instance.SessionTokenExists)
-        {
-            Debug.Log("Session token not found");
-            return;
-        }
-
-        Debug.Log("returning player signing in...");
-        await SignInAnonymouslyAsync();
-
-        SceneManager.LoadScene(1);
+        RefreshProfile();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void RefreshProfile()
     {
+        playerID = AuthenticationService.Instance.PlayerId;
+        playerIDText.text = playerID;
 
+        isLinkToUnityID = AuthenticationService.Instance.IsSignedIn;
+        linkUnityButton.gameObject.SetActive(!isLinkToUnityID);
+        isLinkToUnityText.text = isLinkToUnityID ? "linked" : "";
     }
-    public async void StartAnonymousSignIn()
+    public void BackToMainMenu()
     {
-        await SignInAnonymouslyAsync();
-    }
-    private async Task SignInAnonymouslyAsync()
-    {
-        try
-        {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log("Sign in anonymously succeeded!");
-
-            // Shows how to get the playerID
-            Debug.Log($"PlayerID: {AuthenticationService.Instance.PlayerId}");
-
-        }
-        catch (AuthenticationException ex)
-        {
-            // Compare error code to AuthenticationErrorCodes
-            // Notify the player with the proper error message
-            Debug.LogException(ex);
-        }
-        catch (RequestFailedException ex)
-        {
-            // Compare error code to CommonErrorCodes
-            // Notify the player with the proper error message
-            Debug.LogException(ex);
-        }
+        SceneManager.LoadScene("Home");
     }
     public async void StartUnitySignInAsync()
     {
@@ -98,9 +64,10 @@ public class LoginManager : MonoBehaviour
                 Debug.Log("signin up with unity player account");
                 await AuthenticationService.Instance.SignInWithUnityAsync(PlayerAccountService.Instance.AccessToken);
                 Debug.Log("Successfully signed in with unity player account");
+
                 return;
             }
-            //player udh login dan mau link account unity
+            //player udh login anonim dan mau link account unity
             if (!HasUnityID())
             {
                 Debug.Log("Linking anonymous account to unity...");
@@ -109,7 +76,7 @@ public class LoginManager : MonoBehaviour
                 return;
             }
 
-            //player udh login dan udh link account unity
+            //player udh login anonim dan udh link account unity
             Debug.Log("player is already signed in to their unity player account");
         }
         catch (RequestFailedException ex)
@@ -128,6 +95,8 @@ public class LoginManager : MonoBehaviour
         {
             await AuthenticationService.Instance.LinkWithUnityAsync(accessToken);
             Debug.Log("Link is successful.");
+
+            RefreshProfile();
         }
         catch (AuthenticationException ex) when (ex.ErrorCode == AuthenticationErrorCodes.AccountAlreadyLinked)
         {
@@ -147,32 +116,5 @@ public class LoginManager : MonoBehaviour
             Debug.LogException(ex);
         }
     }
-    public async void UnlinkUnity()
-    {
-        try
-        {
-            Debug.Log("Unlinking unity player account...");
-            await AuthenticationService.Instance.UnlinkUnityAsync();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogException(ex);
-        }
-    }
-    public void SignOut()
-    {
-        Debug.Log("signing out...");
-        AuthenticationService.Instance.SignOut();
-        PlayerAccountService.Instance.SignOut();
-    }
-    public void ClearSessionToken()
-    {
-        Debug.Log("clearing session token...");
-        AuthenticationService.Instance.ClearSessionToken();
-    }
-    public void DeleteAccount()
-    {
-        Debug.Log("deleting account...");
-        AuthenticationService.Instance.DeleteAccountAsync();
-    }
+
 }
