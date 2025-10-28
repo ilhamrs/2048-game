@@ -7,12 +7,15 @@ using Unity.Services.Authentication;
 using System;
 using UnityEngine.SceneManagement;
 using Unity.Services.Authentication.PlayerAccounts;
+using Facebook.Unity;
 
 
 public class LoginManager : MonoBehaviour
 {
     private async void Awake()
     {
+        InitializeFacebook();
+
         if (UnityServices.State == ServicesInitializationState.Uninitialized)
         {
             Debug.Log("Services Initializing");
@@ -33,7 +36,7 @@ public class LoginManager : MonoBehaviour
         Debug.Log("returning player signing in...");
         await SignInAnonymouslyAsync();
 
-        SceneManager.LoadScene(1);
+        // SceneManager.LoadScene(1);
     }
 
     // Update is called once per frame
@@ -69,6 +72,7 @@ public class LoginManager : MonoBehaviour
             Debug.LogException(ex);
         }
     }
+    //unity
     public async void StartUnitySignInAsync()
     {
         if (PlayerAccountService.Instance.IsSignedIn)
@@ -156,6 +160,114 @@ public class LoginManager : MonoBehaviour
         }
         catch (Exception ex)
         {
+            Debug.LogException(ex);
+        }
+    }
+    //facebook
+    private void InitializeFacebook()
+    {
+        if (!FB.IsInitialized)
+        {
+            FB.Init(InitCallback, OnHideUnity);
+        }
+        else
+        {
+            FB.ActivateApp();
+        }
+    }
+    private void InitCallback()
+    {
+        if (FB.IsInitialized)
+        {
+            FB.ActivateApp();
+        }
+        else
+        {
+            Debug.Log("failed to initialize the facebook sdk");
+        }
+    }
+    private void OnHideUnity(bool isGameShown)
+    {
+        if (!isGameShown)
+        {
+            //pause
+            Time.timeScale = 0;
+        }
+        else
+        {
+            //resume
+            Time.timeScale = 1;
+        }
+    }
+    public void StartFacebookSignIn()
+    {
+        // Define the permissions
+        var perms = new List<string>() { "public_profile", "email" };
+
+        FB.LogInWithReadPermissions(perms, async result =>
+        {
+            if (FB.IsLoggedIn)
+            {
+                var facebookAccessToken = AccessToken.CurrentAccessToken.TokenString;
+                Debug.Log($"Facebook Login token: {facebookAccessToken}");
+
+                if (!AuthenticationService.Instance.IsSignedIn)
+                {
+                    await SignInWithFacebookAsync(facebookAccessToken);
+                }
+                else
+                {
+                    await LinkWithFacebookAsync(facebookAccessToken);
+                }
+            }
+            else
+            {
+                Debug.Log("[Facebook Login] User cancelled login");
+            }
+        });
+    }
+    async Task SignInWithFacebookAsync(string token)
+    {
+        try
+        {
+            await AuthenticationService.Instance.SignInWithFacebookAsync(token);
+            Debug.Log("SignIn is successful.");
+        }
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+    }
+    async Task LinkWithFacebookAsync(string token)
+    {
+        try
+        {
+            await AuthenticationService.Instance.LinkWithFacebookAsync(token);
+            Debug.Log("Link is successful.");
+        }
+        catch (AuthenticationException ex) when (ex.ErrorCode == AuthenticationErrorCodes.AccountAlreadyLinked)
+        {
+            // Prompt the player with an error message.
+            Debug.LogError("This user is already linked with another account. Log in instead.");
+        }
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
             Debug.LogException(ex);
         }
     }
