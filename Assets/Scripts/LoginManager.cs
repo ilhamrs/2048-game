@@ -8,6 +8,7 @@ using System;
 using UnityEngine.SceneManagement;
 using Unity.Services.Authentication.PlayerAccounts;
 using Facebook.Unity;
+using EasyPopupSystem;
 
 
 public class LoginManager : MonoBehaviour
@@ -85,6 +86,7 @@ public class LoginManager : MonoBehaviour
         try
         {
             await PlayerAccountService.Instance.StartSignInAsync();
+            SceneManager.LoadScene(1);
         }
         catch (RequestFailedException ex)
         {
@@ -103,6 +105,7 @@ public class LoginManager : MonoBehaviour
                 Debug.Log("signin up with unity player account");
                 await AuthenticationService.Instance.SignInWithUnityAsync(PlayerAccountService.Instance.AccessToken);
                 Debug.Log("Successfully signed in with unity player account");
+                SceneManager.LoadScene(1);
                 return;
             }
             //player udh login dan mau link account unity
@@ -111,6 +114,7 @@ public class LoginManager : MonoBehaviour
                 Debug.Log("Linking anonymous account to unity...");
                 await LinkWithUnityAsync(PlayerAccountService.Instance.AccessToken);
                 Debug.Log("Successfully linked anonymous account");
+                SceneManager.LoadScene(1);
                 return;
             }
 
@@ -138,6 +142,7 @@ public class LoginManager : MonoBehaviour
         {
             // Prompt the player with an error message.
             Debug.LogError("This user is already linked with another account. Log in instead.");
+            EasyToast.Create("Error", "This user is already linked with another account. Log in instead.", "ToastError", EasyToastPosition.Right, null, 3f, true);
         }
         catch (AuthenticationException ex)
         {
@@ -221,6 +226,8 @@ public class LoginManager : MonoBehaviour
                     await LinkWithFacebookAsync(facebookAccessToken);
                 }
 
+                SceneManager.LoadScene(1);
+
                 // Ambil data profil dari Graph API
                 FB.API("/me?fields=name,email", HttpMethod.GET, OnProfileDataReceived);
             }
@@ -261,6 +268,7 @@ public class LoginManager : MonoBehaviour
         {
             // Prompt the player with an error message.
             Debug.LogError("This user is already linked with another account. Log in instead.");
+            EasyToast.Create("Error", "This user is already linked with another account. Log in instead.", "ToastError", EasyToastPosition.Right, null, 3f, true);
         }
         catch (AuthenticationException ex)
         {
