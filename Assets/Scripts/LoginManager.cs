@@ -10,12 +10,24 @@ using Unity.Services.Authentication.PlayerAccounts;
 using Facebook.Unity;
 using EasyPopupSystem;
 
+#if UNITY_ANDROID
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
+#endif
+
 
 public class LoginManager : MonoBehaviour
 {
+    private string m_GooglePlayGamesToken;
     private async void Awake()
     {
         InitializeFacebook();
+
+#if UNITY_ANDROID
+        PlayGamesPlatform.DebugLogEnabled = true;
+        PlayGamesPlatform.Activate();
+        LoginGooglePlayGames();
+#endif
 
         if (UnityServices.State == ServicesInitializationState.Uninitialized)
         {
@@ -312,6 +324,106 @@ public class LoginManager : MonoBehaviour
             Debug.LogError("Gagal mengambil data profil Facebook: " + result.Error);
         }
     }
+    //google play
+#if UNITY_ANDROID
+    public void LoginGooglePlayGames()
+    {
+        PlayGamesPlatform.Instance.Authenticate((success) =>
+        {
+            if (success == SignInStatus.Success)
+            {
+                Debug.Log("Login with Google Play games successful.");
+
+                PlayGamesPlatform.Instance.RequestServerSideAccess(true, code =>
+                {
+                    Debug.Log("Authorization code: " + code);
+                    m_GooglePlayGamesToken = code;
+                    // This token serves as an example to be used for SignInWithGooglePlayGames
+                });
+            }
+            else
+            {
+                Debug.Log("Login Unsuccessful");
+            }
+        });
+    }
+    public void StartSignInWithGooglePlayGames()
+    {
+        if (!PlayGamesPlatform.Instance.IsAuthenticated())
+        {
+            Debug.LogWarning("Not yet authenticated with Google Play Games -- attempting login again");
+            LoginGooglePlayGames();
+            return;
+        }
+        SignInOrLinkWithGooglePlayGames();
+    }
+    private async void SignInOrLinkWithGooglePlayGames()
+    {
+        if (string.IsNullOrEmpty(m_GooglePlayGamesToken))
+        {
+            Debug.LogWarning("Authorization code is null or empty!");
+            return;
+        }
+
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
+            await SignInWithGooglePlayGamesAsync(m_GooglePlayGamesToken);
+            SceneManager.LoadScene(1);
+        }
+        else
+        {
+            await LinkWithGooglePlayGamesAsync(m_GooglePlayGamesToken);
+            SceneManager.LoadScene(1);
+        }
+    }
+    async Task SignInWithGooglePlayGamesAsync(string authCode)
+    {
+        try
+        {
+            await AuthenticationService.Instance.SignInWithGooglePlayGamesAsync(authCode);
+            Debug.Log("SignIn is successful.");
+        }
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+    }
+    async Task LinkWithGooglePlayGamesAsync(string authCode)
+    {
+        try
+        {
+            await AuthenticationService.Instance.LinkWithGooglePlayGamesAsync(authCode);
+            Debug.Log("Link is successful.");
+        }
+        catch (AuthenticationException ex) when (ex.ErrorCode == AuthenticationErrorCodes.AccountAlreadyLinked)
+        {
+            // Prompt the player with an error message.
+            Debug.LogError("This user is already linked with another account. Log in instead.");
+        }
+
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+    }
+    
+#endif
     public void SignOut()
     {
         Debug.Log("signing out...");
