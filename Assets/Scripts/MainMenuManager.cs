@@ -15,6 +15,11 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("5x5Gameplay");
     }
 
+    public void StartTimeAttack()
+    {
+        SceneManager.LoadScene("TimeAttackGameplay");
+    }
+
     public void CloseGame()
     {
         Application.Quit();

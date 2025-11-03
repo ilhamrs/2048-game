@@ -57,7 +57,10 @@ public class GameManager : MonoBehaviour
         highscore = value;
         highscoreText.text = highscore + "";
     }
-
+    public void SetGameStateGameOver()
+    {
+        ChangeState(GameState.Lose);
+    }
     /// <summary>
     /// Changes the current game state and triggers corresponding actions.
     /// </summary>
@@ -395,6 +398,10 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SetPauseDelay(v));
         // pauseScreen.SetActive(v);
         // isPause = v;
+    }
+    public bool IsPaused()
+    {
+        return isPause;
     }
     IEnumerator SetPauseDelay(bool v)
     {
